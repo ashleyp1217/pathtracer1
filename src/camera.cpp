@@ -155,9 +155,18 @@ Ray Camera::generate_ray(double x, double y) const {
   // 
 
 
-  return Ray(Vector3D(), Vector3D());
-
-
+    Vector3D bottomLeft = Vector3D(-tan(radians(hFov)*.5), -tan(radians(vFov)*.5),-1);
+    Vector3D topRight = Vector3D( tan(radians(hFov)*.5),  tan(radians(vFov)*.5),-1);
+    double xcam = (x * (2*topRight.x)) - topRight.x;
+    double ycam = (y * (2*topRight.y)) - topRight.y;
+    Vector3D point = Vector3D(xcam, ycam, -1);
+    Vector3D direction = c2w * point;
+    direction.normalize();
+    Vector3D origin = pos;
+    Ray r = Ray(origin, direction);
+    r.max_t = fClip;
+    r.min_t = nClip;
+  return r;
 }
 
 

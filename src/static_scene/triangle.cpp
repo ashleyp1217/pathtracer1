@@ -19,16 +19,30 @@ BBox Triangle::get_bbox() const {
 }
 
 bool Triangle::intersect(const Ray& r) const {
-
-  // TODO (Part 1.3):
-  // implement ray-triangle intersection
-
-  Vector3D p1(mesh->positions[v1]), p2(mesh->positions[v2]), p3(mesh->positions[v3]);
-  
-
-  return false;
-
-
+    // TODO (Part 1.3):
+    // implement ray-triangle intersection
+    Vector3D p1(mesh->positions[v1]), p2(mesh->positions[v2]), p3(mesh->positions[v3]);
+    double tmin = r.min_t;
+    double tmax = r.max_t;
+    
+    Vector3D E1 = p2 - p1;
+    Vector3D E2 = p3 - p1;
+    Vector3D S = r.o - p1;
+    Vector3D S1 = cross(r.d, E2);
+    Vector3D S2 = cross(S, E1);
+    Vector3D a = Vector3D(dot(S2, E2), dot(S1, S), dot(S2, r.d));
+    Vector3D tbb = (1.0 / dot(S1,E1)) * a; //Vector3D(t, b1, b2)
+    
+    double t = tbb.x;
+    double b1 = tbb.y;
+    double b2 = tbb.z;
+    
+    if (b1 >= 0 && b2 >= 0 && b1 <= 1 && b2 <= 1 && b1 + b2 <= 1
+        && t >= tmin && t <= tmax) {
+        return true;
+    }
+    
+    return false;
 }
 
 bool Triangle::intersect(const Ray& r, Intersection *isect) const {
@@ -37,13 +51,36 @@ bool Triangle::intersect(const Ray& r, Intersection *isect) const {
   // implement ray-triangle intersection. When an intersection takes
   // place, the Intersection data should be updated accordingly
 
-  Vector3D p1(mesh->positions[v1]), p2(mesh->positions[v2]), p3(mesh->positions[v3]);
-  Vector3D n1(mesh->normals[v1]), n2(mesh->normals[v2]), n3(mesh->normals[v3]);
-  
-  
-  return false;
-
-  
+    Vector3D p1(mesh->positions[v1]), p2(mesh->positions[v2]), p3(mesh->positions[v3]);
+    Vector3D n1(mesh->normals[v1]), n2(mesh->normals[v2]), n3(mesh->normals[v3]);
+    
+    double tmin = r.min_t;
+    double tmax = r.max_t;
+    Vector3D E1 = p2 - p1;
+    Vector3D E2 = p3 - p1;
+    Vector3D S = r.o - p1;
+    Vector3D S1 = cross(r.d, E2);
+    Vector3D S2 = cross(S, E1);
+    
+    Vector3D a = Vector3D(dot(S2, E2), dot(S1, S), dot(S2, r.d));
+    Vector3D tbb = (1.0 / dot(S1, E1)) * a; //Vector3D(t, b1, b2)
+    
+    double t = tbb.x;
+    double b1 = tbb.y;
+    double b2 = tbb.z;
+    
+    if (b1 >= 0 && b2 >= 0 && b1 <= 1 && b2 <= 1 && b1 + b2 <= 1
+        && t >= tmin && t <= tmax) {
+        r.max_t = t;
+        isect->t = t;
+        isect->n = (1-b1-b2)*n1 + (b1*n2) + (b2*n3);
+        isect->primitive = this;
+        isect->bsdf = this->get_bsdf();
+        
+        return true;
+    }
+    
+    return false;
 }
 
 void Triangle::draw(const Color& c, float alpha) const {

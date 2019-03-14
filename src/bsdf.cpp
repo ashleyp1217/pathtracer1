@@ -37,10 +37,8 @@ Spectrum DiffuseBSDF::f(const Vector3D& wo, const Vector3D& wi) {
   // This function takes in both wo and wi and returns the evaluation of
   // the BSDF for those two directions.
 
-
-  return Spectrum();
-
-
+    Spectrum rho = reflectance;
+    return rho / PI;
 }
 
 Spectrum DiffuseBSDF::sample_f(const Vector3D& wo, Vector3D* wi, float* pdf) {
@@ -51,10 +49,8 @@ Spectrum DiffuseBSDF::sample_f(const Vector3D& wo, Vector3D* wi, float* pdf) {
   // After sampling a value for wi, it returns the evaluation of the BSDF
   // at (wo, *wi).
 
-
-  return Spectrum();
-  
-
+    *wi = sampler.get_sample(pdf);
+    return f(wo, *wi);
 }
 
 
